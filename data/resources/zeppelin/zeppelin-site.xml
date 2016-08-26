@@ -1,22 +1,3 @@
-<?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-<!--
-   Licensed to the Apache Software Foundation (ASF) under one or more
-   contributor license agreements.  See the NOTICE file distributed with
-   this work for additional information regarding copyright ownership.
-   The ASF licenses this file to You under the Apache License, Version 2.0
-   (the "License"); you may not use this file except in compliance with
-   the License.  You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
--->
-
 <configuration>
 
 <property>
@@ -51,7 +32,7 @@
 
 <property>
   <name>zeppelin.notebook.homescreen</name>
-  <value></value>
+  <value />
   <description>id of notebook to be displayed in homescreen. ex) 2A94M5J1Z Empty value displays default home screen</description>
 </property>
 
@@ -62,18 +43,18 @@
 </property>
 
 
-<!-- Amazon S3 notebook storage -->
-<!-- Creates the following directory structure: s3://{bucket}/{username}/{notebook-id}/note.json -->
+
+
 
 <property>
   <name>zeppelin.notebook.s3.user</name>
-  <value>rawkintrevo</value>
+  <value>s3-user</value>
   <description>user name for s3 folder structure</description>
 </property>
 
 <property>
   <name>zeppelin.notebook.s3.bucket</name>
-  <value>rawkintrevos-notebooks</value>
+  <value>s3-bucket</value>
   <description>bucket name for notebook storage</description>
 </property>
 
@@ -90,80 +71,26 @@
 </property>
 
 
-<!-- Additionally, encryption is supported for notebook data stored in S3 -->
-<!-- Use the AWS KMS to encrypt data -->
-<!-- If used, the EC2 role assigned to the EMR cluster must have rights to use the given key -->
-<!-- See https://aws.amazon.com/kms/ and http://docs.aws.amazon.com/kms/latest/developerguide/concepts.html -->
-<!--
-<property>
-  <name>zeppelin.notebook.s3.kmsKeyID</name>
-  <value>AWS-KMS-Key-UUID</value>
-  <description>AWS KMS key ID used to encrypt notebook data in S3</description>
-</property>
--->
-
-<!-- Use a custom encryption materials provider to encrypt data -->
-<!-- No configuration is given to the provider, so you must use system properties or another means to configure -->
-<!-- See https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/EncryptionMaterialsProvider.html -->
-<!--
-<property>
-  <name>zeppelin.notebook.s3.encryptionMaterialsProvider</name>
-  <value>provider implementation class name</value>
-  <description>Custom encryption materials provider used to encrypt notebook data in S3</description>
-</property>
--->
 
 
-<!-- If using Azure for storage use the following settings -->
-<!--
-<property>
-  <name>zeppelin.notebook.azure.connectionString</name>
-  <value>DefaultEndpointsProtocol=https;AccountName=<accountName>;AccountKey=<accountKey></value>
-  <description>Azure account credentials</description>
-</property>
 
-<property>
-  <name>zeppelin.notebook.azure.share</name>
-  <value>zeppelin</value>
-  <description>share name for notebook storage</description>
-</property>
 
-<property>
-  <name>zeppelin.notebook.azure.user</name>
-  <value>user</value>
-  <description>optional user name for Azure folder structure</description>
-</property>
 
-<property>
-  <name>zeppelin.notebook.storage</name>
-  <value>org.apache.zeppelin.notebook.repo.AzureNotebookRepo</value>
-  <description>notebook persistence layer implementation</description>
-</property>
--->
 
-<!-- For versioning your local notebook storage using Git repository
-<property>
-  <name>zeppelin.notebook.storage</name>
-  <value>org.apache.zeppelin.notebook.repo.GitNotebookRepo</value>
-  <description>notebook persistence layer implementation</description>
-</property>
--->
 
-<!-- For connecting your Zeppelin with ZeppelinHub -->
-<!--
-<property>
-  <name>zeppelin.notebook.storage</name>
-  <value>org.apache.zeppelin.notebook.repo.VFSNotebookRepo, org.apache.zeppelin.notebook.repo.zeppelinhub.ZeppelinHubRepo</value>
-  <description>two notebook persistence layers (local + ZeppelinHub)</description>
-</property>
--->
-<!--
-<property>
-  <name>zeppelin.notebook.storage</name>
-  <value>org.apache.zeppelin.notebook.repo.VFSNotebookRepo</value>
-  <description>notebook persistence layer implementation</description>
-</property>
--->
+
+
+
+
+
+
+
+
+
+
+
+
+
 <property>
   <name>zeppelin.notebook.one.way.sync</name>
   <value>false</value>
@@ -191,7 +118,7 @@
 <property>
   <name>zeppelin.interpreter.group.order</name>
   <value>"spark,md,angular,sh,livy,alluxio,file,psql,flink,python,ignite,lens,cassandra,geode,kylin,elasticsearch,scalding,jdbc,hbase</value>
-  <description></description>
+  <description />
 </property>
 
 <property>
@@ -231,13 +158,7 @@
   <description>Keystore password. Can be obfuscated by the Jetty Password tool</description>
 </property>
 
-<!--
-<property>
-  <name>zeppelin.ssl.key.manager.password</name>
-  <value>change me</value>
-  <description>Key Manager password. Defaults to keystore password. Can be obfuscated.</description>
-</property>
--->
+
 
 <property>
   <name>zeppelin.ssl.truststore.path</name>
@@ -251,13 +172,7 @@
   <description>The format of the given truststore (e.g. JKS or PKCS12). Defaults to the same type as the keystore type</description>
 </property>
 
-<!--
-<property>
-  <name>zeppelin.ssl.truststore.password</name>
-  <value>change me</value>
-  <description>Truststore password. Can be obfuscated by the Jetty Password tool. Defaults to the keystore password</description>
-</property>
--->
+
 
 <property>
   <name>zeppelin.server.allowed.origins</name>
@@ -278,4 +193,3 @@
 </property>
 
 </configuration>
-

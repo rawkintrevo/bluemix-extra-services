@@ -26,7 +26,3 @@ export ZEPPELIN_PORT=8081
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
 export JAVA_HOME=/opt/ibm/jdk
-export ZEPPELIN_NOTEBOOK_S3_BUCKET=rawkintrevos-notebooks
-export ZEPPELIN_NOTEBOOK_S3_USER=rawkintrevo
-export AWS_ACCESS_KEY_ID=AKIAJ2V47TU7L46JUZ4Q
-export AWS_SECRET_ACCESS_KEY=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
