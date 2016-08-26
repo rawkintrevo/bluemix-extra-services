@@ -1,6 +1,7 @@
 
 
 from data.services.zeppelin import ZeppelinServiceOnBI
+from data.services.nifi import NiFiServiceOnBI
 
 from data.webapp import clone_rawkintrevos_webapp_template, deploy_app
 
@@ -26,4 +27,14 @@ zeppelin.setS3auth(S3_USERNAME, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_
 zeppelin.updateConifg()
 zeppelin.deployApp(APP_PREFIX)
 
+
+nifi = NiFiServiceOnBI(SERVER, USERNAME, PASSWORD)
+nifi.install()
+nifi.start()
+nifi.deployApp(APP_PREFIX)
+
 print "your app will be deployed to http://%s-zeppelin.mybluemix.net/" % APP_PREFIX
+print "your app will be deployed to http://%s-nifi.mybluemix.net/" % APP_PREFIX
+
+
+
