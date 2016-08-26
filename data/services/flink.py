@@ -55,11 +55,11 @@ class FlinkServiceOnBI:
         """
         stdin, stdout, stderr = self.ssh.exec_command(
             "%s/bin/yarn-session.sh -n %i %s" % (self.dirName, containers, otherArgs))
-        print stdout
+        self.stdout = stdout
 
-    def deployApp(self, prefix=""):
+    def deployApp(self, prefix="", remotePort=8088, remoteAddr="127.0.0.1"):
         if prefix == "":
             print "please specify prefix. I'm not deploying with out it"
             return
         from data.webapp import deploy_app
-        deploy_app(8088, prefix+"-flink", self.server, self.username, self.password)
+        deploy_app(remotePort, prefix+"-flink", self.server, self.username, self.password, remoteAddr)

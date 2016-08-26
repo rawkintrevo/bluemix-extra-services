@@ -2,12 +2,14 @@ from subprocess import call
 
 import json
 
-def deploy_app(port, new_app_name, server, username, password ):
+def deploy_app(port, new_app_name, server, username, password, remoteBindAddr="127.0.0.1" ):
     app_config = {
         "server": server,
         "username": username,
         "password": password,
-        "remotePort": port
+        "remotePort": port,
+        "remoteBindAddr" : remoteBindAddr
+
     }
 
     with open('webapp/config.json', 'w') as f:
