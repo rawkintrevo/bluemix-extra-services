@@ -97,17 +97,17 @@ class ZeppelinServiceOnBI:
     def _uploadTerpJson(self):
         self.scp.put("./data/resources/zeppelin/interpreter.json", '/home/guest/zeppelin-0.7.0-SNAPSHOT/conf/interpreter.json')
 
-    def _readTerpJson():
-        _downloadTerpJson()
+    def _readTerpJson(self):
+        self._downloadTerpJson()
         with open("./data/resources/zeppelin/interpreter.json") as f:
             self.interpreter_json = json.load(f)
 
-    def _writeTerpJson():
+    def _writeTerpJson(self):
         with open("./data/resources/zeppelin/interpreter.json", 'w') as f:
             json.dump(self.interpreter_json, f)
-        _uploadTerpJson()
+        self._uploadTerpJson(self)
 
-    def _updateSparkTerp():
+    def _updateSparkTerp(self):
         for k, v in self.interpreter_json['interpreterSettings'].iteritems():
             if v['name'] == 'spark':
                 spark_id = k
