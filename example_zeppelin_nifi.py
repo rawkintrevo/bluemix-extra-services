@@ -11,9 +11,9 @@ from data.webapp import clone_rawkintrevos_webapp_template, deploy_app
 APP_PREFIX="no-gradle-1"
 
 BLUEMIX_GIT_DIR="/home/rawkintrevo/gits/blue-mix/bi-git2"
-SERVER = "bi-hadoop-prod-4162.bi.services.us-south.bluemix.net"
-USERNAME = "guest"
-PASSWORD = "password1234"
+SERVER = "" # eg ""bi-hadoop-prod-4162.bi.services.us-south.bluemix.net"
+USERNAME = "" # eg "user1"
+PASSWORD = "" # eg "password1"
 
 print "establishing ssh"
 ssh = paramiko.SSHClient()
