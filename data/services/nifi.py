@@ -35,7 +35,7 @@ class NiFiServiceOnBI:
         print "untarring %s" % self.tarName
         stdin, stdout, stderr = self.ssh.exec_command("tar xzvf %s" % self.tarName)
         output = stdout.read()
-        self.dirName = output.split("\n")[0][:-1]
+        self.dirName = output.split("\n")[0].split("/")[0]
         print "untarred into %s" % self.dirName
 
     def updateConfig(self):
@@ -49,19 +49,21 @@ class NiFiServiceOnBI:
                 '/home/%s/%s/conf/bootstrap.conf' % (self.username, self.dirName))
         scp.close()
 
-    def start(self, containers=1, otherArgs=""):
+    def start(self):
         """
-
-        :param containers:
-        :param otherArgs:  see https://ci.apache.org/projects/flink/flink-docs-master/setup/yarn_setup.html#start-flink-session
-        :return:
         """
         stdin, stdout, stderr = self.ssh.exec_command("%s/bin/nifi.sh status" % self.dirName)
         nifi_status = stdout.readlines()
-        if "is currently running" in nifi_status[6]:
+        if "is currently running" in "".join(nifi_status):
             print "NiFi already running."
         if "is not running" in nifi_status[6]:
             stdin, stdout, stderr = self.ssh.exec_command("nohup %s/bin/nifi.sh start &" % self.dirName)
+
+
+
+    def stop(self):
+        stdin, stdout, stderr = self.ssh.exec_command("%s/bin/nifi.sh stop" % self.dirName)
+
 
     def deployApp(self, prefix="", remotePort=8084, remoteAddr="127.0.0.1"):
         if prefix == "":

@@ -1,7 +1,10 @@
 import json
 
 from scp import SCPClient
-from time import sleep
+
+# todo
+# 1) force redownload or skip re download
+# 2) abscract add terp prop / add terp dep
 
 class ZeppelinServiceOnBI:
     def __init__(self, server, username, password):
@@ -28,10 +31,20 @@ class ZeppelinServiceOnBI:
         self._download()
         self._untar()
 
-    def updateConfig(self):
+    def updateConfig(self, useLocal=True):
+        self.useLocal = useLocal
         self._readTerpJson()
-        self._updateSparkTerp()
-        print "todo need to update interpreter.json with new server address for hive"
+        self._updateTerp('spark', 'master', 'yarn-client')
+        #todo make this optional
+        self.addMahoutConfig()
+        self._updateTerp("jdbc", "hive.url", 'jdbc:hive2://' + self.server +
+                                                            ':10000/default;ssl\u003dtrue;sslTrustStore\u003d/home/' +
+                                                            self.username + '/zeppelin_truststore.jks;trustStorePassword\u003dmypassword;')
+        self._updateTerp("jdbc", "hive.user", self.username)
+        self._updateTerp("jdbc", "hive.password", self.password)
+        self._writeTerpJson()
+
+        print "todo need to update interpreter.json with new server address for bigsql"
         self.scp.put('./data/resources/zeppelin/zeppelin_env.sh', './zeppelin-0.7.0-SNAPSHOT/conf/zeppelin-env.sh')
         self.scp.put('./data/resources/zeppelin/zeppelin-site.xml',
                      './zeppelin-0.7.0-SNAPSHOT/conf/zeppelin-site.xml')
@@ -40,6 +53,28 @@ class ZeppelinServiceOnBI:
         self._uploadTerpJson()
         stdin, stdout, stderr = self.ssh.exec_command("zeppelin-0.7.0-SNAPSHOT/bin/zeppelin-daemon.sh restart")
         print stdout.read()
+
+    def findInstalledZeppelin(self):
+        stdin, stdout, stderr = self.ssh.exec_command("ls $HOME/zeppelin*")
+        lines = stdout.readlines()
+        zdirs = [l for l in lines if ":" in l]
+        if len(zdirs) > 1:
+            print "naughty naughty- you have multiple zeppelin installs!"
+        self.dirName = zdirs[0].split(":")[0]
+
+
+    def addMahoutConfig(self):
+        # todo- add jars here too
+        configs = {
+            "spark.kryo.referenceTracking":"false",
+            "spark.kryo.registrator": "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator",
+            "spark.kryoserializer.buffer" : "32k",
+            "spark.kryoserializer.buffer.max" : "600m",
+            "spark.serializer" : "org.apache.spark.serializer.KryoSerializer"
+        }
+
+        for k,v in configs.iteritems():
+            self._updateTerp("spark", k, v)
 
     def _download(self):
         print "downloading %s" % self.binaryLocation
@@ -52,7 +87,7 @@ class ZeppelinServiceOnBI:
         print "untarring %s" % self.tarName
         stdin, stdout, stderr = self.ssh.exec_command("tar xzvf %s" % self.tarName)
         output = stdout.read()
-        self.dirName = output.split("\n")[0][:-1]
+        self.dirName = output.split("\n")[0].split("/")[0]
         print "untarred into %s" % self.dirName
 
     def start(self):
@@ -66,6 +101,14 @@ class ZeppelinServiceOnBI:
             if not "OK" in zeppelin_status:
                 print "FYI: zeppelin didn't start up correctly."
                 print zeppelin_status
+
+    def deployApp(self, prefix="", remotePort=8081, remoteAddr="127.0.0.1"):
+        if prefix == "":
+            print "please specify prefix. I'm not deploying with out it"
+            return
+        from data.webapp import deploy_app
+        deploy_app(remotePort, prefix + "-zeppelin", self.server, self.username, self.password, remoteAddr)
+
 
     ###############################################################################################################
     ### Service Specific Methods
@@ -98,22 +141,23 @@ class ZeppelinServiceOnBI:
         self.scp.put("./data/resources/zeppelin/interpreter.json", '/home/guest/zeppelin-0.7.0-SNAPSHOT/conf/interpreter.json')
 
     def _readTerpJson(self):
-        self._downloadTerpJson()
+        if self.useLocal != True:
+            self._downloadTerpJson()
         with open("./data/resources/zeppelin/interpreter.json") as f:
             self.interpreter_json = json.load(f)
 
     def _writeTerpJson(self):
         with open("./data/resources/zeppelin/interpreter.json", 'w') as f:
             json.dump(self.interpreter_json, f)
-        self._uploadTerpJson(self)
+        self._uploadTerpJson()
 
-    def _updateSparkTerp(self):
+    def _updateTerp(self, terpName, property, value):
         for k, v in self.interpreter_json['interpreterSettings'].iteritems():
             if v['name'] == 'spark':
-                spark_id = k
+                terp_id = k
                 break
 
-        self.interpreter_json['interpreterSettings'][spark_id]['properties']['master'] = "yarn-client"
+        self.interpreter_json['interpreterSettings'][terp_id]['properties'][property] = value
 
 
 

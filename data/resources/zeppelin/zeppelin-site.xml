@@ -8,7 +8,7 @@
 
 <property>
   <name>zeppelin.server.port</name>
-  <value>8080</value>
+  <value>8081</value>
   <description>Server port.</description>
 </property>
 
@@ -48,13 +48,13 @@
 
 <property>
   <name>zeppelin.notebook.s3.user</name>
-  <value>s3-user</value>
+  <value>rawkintrevo</value>
   <description>user name for s3 folder structure</description>
 </property>
 
 <property>
   <name>zeppelin.notebook.s3.bucket</name>
-  <value>s3-bucket</value>
+  <value>rawkintrevos-notebooks</value>
   <description>bucket name for notebook storage</description>
 </property>
 
