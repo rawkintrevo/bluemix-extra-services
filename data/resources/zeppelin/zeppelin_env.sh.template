@@ -27,8 +27,3 @@ export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
 export JAVA_HOME=/opt/ibm/jdk
 
-export ZEPPELIN_NOTEBOOK_S3_BUCKET=rawkintrevos-notebooks
-export ZEPPELIN_NOTEBOOK_S3_USER=rawkintrevo
-export AWS_ACCESS_KEY_ID=AKIAIZH36JGW56KSSKAA
-export AWS_SECRET_ACCESS_KEY=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
-        

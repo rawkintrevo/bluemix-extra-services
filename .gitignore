@@ -3,3 +3,7 @@ data/resources/rootkey.csv
 rawkintrevo-working/
 scratch.py
 webapp/
+data/resources/zeppelin/zeppelin_env.sh
+data/resources/zeppelin/interpreter.json
+data/resources/aws/
+
