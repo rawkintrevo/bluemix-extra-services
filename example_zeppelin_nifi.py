@@ -23,6 +23,9 @@ clone_rawkintrevos_webapp_template()
 
 zeppelin = ZeppelinServiceOnBI(SERVER, USERNAME, PASSWORD)
 zeppelin.install()
+zeppelin.start()
+from time import sleep
+sleep(5)
 zeppelin.setS3auth(S3_USERNAME, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 zeppelin.updateConifg()
 zeppelin.deployApp(APP_PREFIX)

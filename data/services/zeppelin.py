@@ -1,3 +1,5 @@
+from time import sleep
+
 import json
 
 from scp import SCPClient
@@ -12,7 +14,7 @@ class ZeppelinServiceOnBI:
         self.username = username
         self.password = password
         self.binaryLocation = "https://github.com/rawkintrevo/incubator-zeppelin/releases/download/v0.7.0-NIGHTLY-2016.08.22/zeppelin-0.7.0-SNAPSHOT.tar.gz"
-        self.dirName = ""
+        self.dirName = None
         self.useLocal = False # Use Local Copy of interpreter.json (instead of trying to download server copy
         self.connect()
 
@@ -77,9 +79,16 @@ class ZeppelinServiceOnBI:
         dirs = [l for l in lines if ":" in l]
         if len(dirs) > 1:
             print "naughty naughty- you have multiple %s installs!"
-        return dirs[0].split(":")[0]
+        if len(dirs) == 1:
+            return dirs[0].split(":")[0]
+        if len(dirs) -- 0:
+            return ""
 
     def addMahoutConfig(self):
+        mahoutDir = self._findService("apache-mahout")
+        if mahoutDir == None:
+            print "tried to add mahout but it's not installed!"
+            return
 
         configs = {
             "spark.kryo.referenceTracking":"false",
@@ -92,7 +101,7 @@ class ZeppelinServiceOnBI:
         for k,v in configs.iteritems():
             self._updateTerpProp("spark", k, v)
 
-        mahoutDir = self._findService("apache-mahout")
+
         mahoutVersion = self._findService("apache-mahout").split('-')[-1]
         terpDeps = ['%s/mahout-spark_2.10-%s-dependency-reduced.jar' % (mahoutDir, mahoutVersion),
                     "%s/mahout-spark-shell_2.10-%s.jar" % (mahoutDir, mahoutVersion),
@@ -107,6 +116,7 @@ class ZeppelinServiceOnBI:
 
     def _download(self):
         print "downloading %s" % self.binaryLocation
+        print "todo: check if downloaded then skip if its there"
         stdin, stdout, stderr = self.ssh.exec_command(
             "wget %s" % self.binaryLocation)
         print stdout.read()
@@ -116,7 +126,7 @@ class ZeppelinServiceOnBI:
         print "untarring %s" % self.tarName
         stdin, stdout, stderr = self.ssh.exec_command("tar xzvf %s" % self.tarName)
         output = stdout.read()
-        self.dirName = self.findInstalledZeppelin()
+        self.findInstalledZeppelin()
         print "untarred into %s" % self.dirName
 
     def start(self):
