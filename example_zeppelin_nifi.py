@@ -28,10 +28,12 @@ zeppelin.updateConifg()
 zeppelin.deployApp(APP_PREFIX)
 zeppelin.start()
 
-nifi = NiFiServiceOnBI(SERVER, USERNAME, PASSWORD)
-nifi.install()
-nifi.start()
-nifi.deployApp(APP_PREFIX)
+n = NiFiServiceOnBI(SERVER, USERNAME, PASSWORD)
+n.install()
+n.uploadConfig()
+n.start()
+n.deployApp("tester-00001")
+
 
 print "your app will be deployed to http://%s-zeppelin.mybluemix.net/" % APP_PREFIX
 print "your app will be deployed to http://%s-nifi.mybluemix.net/" % APP_PREFIX
