@@ -4,6 +4,7 @@ rawkintrevo-working/
 scratch.py
 webapp/
 data/resources/zeppelin/zeppelin_env.sh
+data/resources/zeppelin/zeppelin-env.sh
 data/resources/zeppelin/interpreter.json
 data/resources/aws/
 
