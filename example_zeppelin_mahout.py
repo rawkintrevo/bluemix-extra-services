@@ -1,4 +1,5 @@
 
+from time import sleep
 
 from data.services.zeppelin import ZeppelinServiceOnBI
 from data.services.mahout import MahoutServiceOnBI
@@ -17,22 +18,27 @@ PASSWORD = "" # eg "password1"
 S3_USERNAME = 'user'
 S3_BUCKET = "bucekt"
 
-aws_keys = open("data/resources/rootkey.csv").readlines()
-AWS_ACCESS_KEY_ID= aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
-AWS_SECRET_ACCESS_KEY=aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")
-
 clone_rawkintrevos_webapp_template()
 
-mahout = MahoutServiceOnBI(SERVER, USERNAME, PASSWORD)
-mahout.install()
+m = MahoutServiceOnBI(SERVER, USERNAME, PASSWORD)
+m.install()
 
-zeppelin = ZeppelinServiceOnBI(SERVER, USERNAME, PASSWORD)
-zeppelin.install()
-zeppelin.setS3auth(S3_USERNAME, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-zeppelin.updateConifg()
+z = ZeppelinServiceOnBI(SERVER, USERNAME, PASSWORD)
+z.install()
+z.start()
+sleep(5)
+z.downloadConfig({"interpreter.json"  : "conf/interpreter.json"})
+z.updateConfig()
+## Add your own dependencies if you want them always there...
+#z._addTerpDep("spark", "com.databricks:spark-csv_2.10:1.4.0")
+new_terp_name = "mahoutSpark"
+z.createTerp(new_terp_name, "spark")
+z.addMahoutConfig(new_terp_name)
 
-mahout.updateSparkTerpWithMahoutDeps()
-zeppelin._uploadTerpJson()
+z.setS3auth(S3_USERNAME, S3_BUCKET)
+z._writeTerpJson()
+z.uploadConfig()
+z.start()
+z.deployApp(APP_PREFIX)
 
-zeppelin.start()
-zeppelin.deployApp(APP_PREFIX)
+print "your app will be deployed to http://%s-zeppelin.mybluemix.net/" % APP_PREFIX

@@ -2,7 +2,7 @@ from data.services.common import AbstractServiceOnBI
 
 class MahoutServiceOnBI(AbstractServiceOnBI):
     service_name = 'apache-mahout'
-    binaryLocation = ""
+    binaryLocation = "http://apache.osuosl.org/mahout/0.12.2/apache-mahout-distribution-0.12.2.tar.gz"
 
     def getVersion(self):
         self.version = self.dirName.split("-")[-1]

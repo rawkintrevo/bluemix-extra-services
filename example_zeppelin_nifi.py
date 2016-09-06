@@ -26,7 +26,7 @@ zeppelin.install()
 zeppelin.start()
 from time import sleep
 sleep(5)
-zeppelin.setS3auth(S3_USERNAME, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+zeppelin.setS3auth(S3_USERNAME, S3_BUCKET)
 zeppelin.updateConifg()
 zeppelin.deployApp(APP_PREFIX)
 zeppelin.start()

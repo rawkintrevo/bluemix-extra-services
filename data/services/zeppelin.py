@@ -65,11 +65,12 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
         self._updateMulitpleProps(basicTerpPropUpdates)
         self._updateMultipleDeps(basicTerpDeps)
 
+    def addMahoutConfig(self, terpName = None):
 
-        #todo make this optional
-        #self.addMahoutConfig()
+        if terpName == None:
+            terpName = 'spark'
 
-    def addMahoutConfig(self):
+        print "updating '%s' with Apache Mahout dependencies and settings" % terpName
 
         configs = {
             "spark.kryo.referenceTracking":"false",
@@ -80,21 +81,23 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
         }
 
         for k,v in configs.iteritems():
-            self._updateTerpProp("spark", k, v)
+            self._updateTerpProp(terpName, k, v)
 
         mahoutDir = self._findService("apache-mahout")
         mahoutVersion = self._findService("apache-mahout").split('-')[-1]
-        terpDeps = ['%s/mahout-spark_2.10-%s-dependency-reduced.jar' % (mahoutDir, mahoutVersion),
-                    "%s/mahout-spark-shell_2.10-%s.jar" % (mahoutDir, mahoutVersion),
-                    "%s/mahout-math-%s.jar" % (mahoutDir, mahoutVersion),
-                    "%s/mahout-math-scala_2.10-%s.jar" % (mahoutDir, mahoutVersion),
-                    "%s/mahout-spark_2.10-%s.jar" % (mahoutDir, mahoutVersion)]
+        terpDeps = ['/home/%s/%s/mahout-spark_2.10-%s-dependency-reduced.jar' % (self.username, mahoutDir, mahoutVersion),
+                    "/home/%s/%s/mahout-spark-shell_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion),
+                    "/home/%s/%s/mahout-math-%s.jar" % (self.username, mahoutDir, mahoutVersion),
+                    "/home/%s/%s/mahout-math-scala_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion),
+                    "/home/%s/%s/mahout-spark_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion)]
 
         for t in terpDeps:
-            self._addTerpDep("spark", t)
+            self._addTerpDep(terpName, t)
 
-    def setS3auth(self, s3user, s3bucket, aws_access_key_id, aws_secret_access_key):
-
+    def setS3auth(self, s3user, s3bucket, root_key_path = "data/resources/aws/rootkey.csv"):
+        aws_keys = open(root_key_path).readlines()
+        aws_access_key_id = aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
+        aws_secret_access_key = aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")
         import xml.etree.ElementTree as ET
         tree = ET.parse('./data/resources/zeppelin/zeppelin-site.xml')
         root = tree.getroot()
@@ -119,7 +122,6 @@ export AWS_SECRET_ACCESS_KEY=%s
     def _writeTerpJson(self):
         with open("./data/resources/zeppelin/interpreter.json", 'wb') as f:
             json.dump(self.interpreter_json, f, sort_keys=True, indent=4)
-        self._uploadTerpJson()
 
     def _updateTerpProp(self, terpName, property, value):
         terp_id = self._getTerpID(terpName)
@@ -153,12 +155,26 @@ export AWS_SECRET_ACCESS_KEY=%s
         self.interpreter_json['interpreterSettings'][terp_id]['dependencies'] = new_deps
 
     def _getTerpID(self, terpName):
+        terp_id = None
         for k, v in self.interpreter_json['interpreterSettings'].iteritems():
             if v['name'] == terpName:
                 terp_id = k
                 break
 
         return terp_id
+
+    def createTerp(self, original_terp_name, new_terp_name ):
+
+        new_terp_id = new_terp_name
+        orig_terp_id = self._getTerpID(original_terp_name)
+
+        from copy import deepcopy
+        self.interpreter_json['interpreterSettings'][new_terp_id] = deepcopy(
+            self.interpreter_json['interpreterSettings'][orig_terp_id])
+        self.interpreter_json['interpreterSettings'][new_terp_id]['name'] = new_terp_name
+        self.interpreter_json['interpreterSettings'][new_terp_id]['id'] = new_terp_id
+        print "created new terp '%s' from terp '%s" % (new_terp_name, original_terp_name)
+
 
 
 

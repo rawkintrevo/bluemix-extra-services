@@ -111,14 +111,16 @@ class AbstractServiceOnBI:
 
     def uploadConfig(self, config_files=None):
         """
-        Method to download specified config files
+        Method to upload specified config files
         :param config:  May be a dict of form {"filename" : "location on server from project directory" }. If None (default)
-        will download all relevent config files.
+        will upload all relevent config files.
         :return: None
         """
+
         self.findService()
         if config_files == None:
             config_files = self.config_files
         for k, v in config_files.iteritems():
+            print("Uploading ./data/resources/%s/%s to ./%s/%s" % (self.service_name, k, self.dirName, v))
             self.scp.put(   "./data/resources/%s/%s" % (self.service_name, k),
-                            './%s/%s' % (self.dirName, v),)
+                            './%s/%s' % (self.dirName, v))
