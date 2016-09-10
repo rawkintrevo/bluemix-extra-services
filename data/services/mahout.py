@@ -2,6 +2,13 @@ from data.services.common import AbstractServiceOnBI
 
 class MahoutServiceOnBI(AbstractServiceOnBI):
     service_name = 'apache-mahout'
+
+    config_files = {
+        "flink-config.yaml": "conf/flink-config.yaml",
+        "guava-14.0.1.jar" : "guava-14.0.1.jar"
+    }
+
+
     binaryLocation = "http://apache.osuosl.org/mahout/0.12.2/apache-mahout-distribution-0.12.2.tar.gz"
 
     def getVersion(self):

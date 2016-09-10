@@ -32,8 +32,6 @@ PASSWORD = "" # eg "password1"
 
 S3_USERNAME = 'user'
 S3_BUCKET = "bucekt"
-AWS_ACCESS_KEY_ID="xxx"
-AWS_SECRET_ACCESS_KEY="yyy"
 
 clone_rawkintrevos_webapp_template()
 

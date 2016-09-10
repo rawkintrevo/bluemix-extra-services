@@ -22,6 +22,7 @@
 #            After making the change run `./gradlew UpdateEnv`, followed
 #            by `./gradlew start` or `./gradlew restart`
 
+#export ZEPPELIN_MEM            		# Zeppelin jvm mem options Default -Xmx1024m -XX:MaxPermSize=512m
 export ZEPPELIN_PORT=8081
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf

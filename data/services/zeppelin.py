@@ -82,34 +82,61 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
         self._updateMulitpleProps(basicTerpPropUpdates)
         self._updateMultipleDeps(basicTerpDeps)
 
-    def addMahoutConfig(self, terpName = None):
+    def addMahoutConfig(self, terpName = None, configs={}):
+
+        mahoutDir = self._findService("apache-mahout")
+        mahoutVersion = self._findService("apache-mahout").split('-')[-1]
 
         if terpName == None:
             terpName = 'spark'
 
         print "updating '%s' with Apache Mahout dependencies and settings" % terpName
 
-        configs = {
-            "spark.kryo.referenceTracking":"false",
-            "spark.kryo.registrator": "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator",
-            "spark.kryoserializer.buffer" : "32k",
-            "spark.kryoserializer.buffer.max" : "600m",
-            "spark.serializer" : "org.apache.spark.serializer.KryoSerializer"
-        }
+        terpDeps = ["/home/%s/%s/mahout-math-%s.jar" % (self.username, mahoutDir, mahoutVersion),
+                    "/home/%s/%s/mahout-math-scala_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion)]
+
+        if "spark" in terpName.lower():
+            configs.update({
+                "spark.kryo.referenceTracking":"false",
+                "spark.kryo.registrator": "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator",
+                "spark.kryoserializer.buffer" : "32k",
+                "spark.kryoserializer.buffer.max" : "600m",
+                "spark.serializer" : "org.apache.spark.serializer.KryoSerializer"
+            })
+            terpDeps.append(
+                '/home/%s/%s/mahout-spark_2.10-%s-dependency-reduced.jar' % (self.username, mahoutDir, mahoutVersion))
+            terpDeps.append(
+                "/home/%s/%s/mahout-spark_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion))
+            terpDeps.append(
+                "/home/%s/%s/mahout-spark-shell_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion))
+
+        if "flink" in terpName.lower():
+            flinkDir  = self._findService("flink")
+            addlDeps = [
+                "/home/%s/%s/mahout-flink_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion),
+                "/home/%s/%s/mahout-hdfs-%s.jar" % (self.username, mahoutDir, mahoutVersion),
+                "/home/%s/%s/guava-14.0.1.jar" % (self.username, mahoutDir)
+            ]
+
+            for t in addlDeps:
+                terpDeps.append( t )
+
+            for t in terpDeps:
+                stdin, stdout, stderr = self.ssh.exec_command(
+                    "cp %s /home/%s/%s/lib/%s" % (t, self.username, flinkDir, t.split("/")[-1]))
+                stdout.read()
+                print "coppied %s to /home/%s/%s/lib/%s"  % (t, self.username, flinkDir, t.split("/")[-1])
 
         for k,v in configs.iteritems():
             self._updateTerpProp(terpName, k, v)
 
-        mahoutDir = self._findService("apache-mahout")
-        mahoutVersion = self._findService("apache-mahout").split('-')[-1]
-        terpDeps = ['/home/%s/%s/mahout-spark_2.10-%s-dependency-reduced.jar' % (self.username, mahoutDir, mahoutVersion),
-                    "/home/%s/%s/mahout-spark-shell_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion),
-                    "/home/%s/%s/mahout-math-%s.jar" % (self.username, mahoutDir, mahoutVersion),
-                    "/home/%s/%s/mahout-math-scala_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion),
-                    "/home/%s/%s/mahout-spark_2.10-%s.jar" % (self.username, mahoutDir, mahoutVersion)]
-
         for t in terpDeps:
             self._addTerpDep(terpName, t)
+
+        mahout_home_str = 'export MAHOUT_HOME=' + '/home/%s/%s' % (self.username, mahoutDir)
+        print "appending '%s' to conf/zeppelin-env.sh" % mahout_home_str
+        with open('./data/resources/zeppelin/zeppelin-env.sh', 'a') as f:
+            f.write(mahout_home_str)
 
     def setS3auth(self, s3user, s3bucket, root_key_path = "data/resources/aws/rootkey.csv"):
         aws_keys = open(root_key_path).readlines()
@@ -130,7 +157,8 @@ export ZEPPELIN_NOTEBOOK_S3_BUCKET=%s
 export ZEPPELIN_NOTEBOOK_S3_USER=%s
 export AWS_ACCESS_KEY_ID=%s
 export AWS_SECRET_ACCESS_KEY=%s
-        """ % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
+
+""" % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
 
     def _readTerpJson(self):
         with open("./data/resources/zeppelin/interpreter.json") as f:
