@@ -40,3 +40,5 @@ class MahoutServiceOnBI(AbstractServiceOnBI):
 
         with open("./data/resources/zeppelin/interpreter.json", 'w') as f:
             json.dump(interpreter_json, f)
+
+

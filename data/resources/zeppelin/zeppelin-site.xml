@@ -48,7 +48,7 @@
 
 <property>
   <name>zeppelin.notebook.s3.user</name>
-  <value>rawkintrevo</value>
+  <value>mahout-demos</value>
   <description>user name for s3 folder structure</description>
 </property>
 

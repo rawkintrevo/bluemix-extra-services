@@ -23,13 +23,15 @@ from data.services.common import AbstractServiceOnBI
 class ZeppelinServiceOnBI(AbstractServiceOnBI):
     service_name = 'zeppelin'
     service_port = 8081
-    binaryLocation = "https://github.com/rawkintrevo/incubator-zeppelin/releases/download/v0.7.0-NIGHTLY-2016.09.06/zeppelin-0.7.0-SNAPSHOT.tar.gz"
+    binaryLocation = "https://github.com/rawkintrevo/incubator-zeppelin/releases/download/v0.7.0-NIGHTLY-2016.09.29/zeppelin-0.7.0-SNAPSHOT.tar.gz"
     interpreter_json = {}
 
     config_files = {
         "interpreter.json"  : "conf/interpreter.json",
         "zeppelin-site.xml" : "conf/zeppelin-site.xml",
-        "zeppelin-env.sh"    : "conf/zeppelin-env.sh"
+        "zeppelin-env.sh"    : "conf/zeppelin-env.sh",
+        "setup.R"           : "../setup.R",
+        "Rprofile_template" : "../.Rprofile"
     }
 
     def start(self):
@@ -219,6 +221,12 @@ export AWS_SECRET_ACCESS_KEY=%s
         self.interpreter_json['interpreterSettings'][new_terp_id]['name'] = new_terp_name
         self.interpreter_json['interpreterSettings'][new_terp_id]['id'] = new_terp_id
         print "created new terp '%s' from terp '%s" % (new_terp_name, original_terp_name)
+
+    def setupR(self):
+        stdin, stdout, stderr = self.ssh.exec_command("mkdir -p ~/R/packages/")
+        stdin, stdout, stderr = self.ssh.exec_command("/usr/iop/current/spark-client/bin/sparkR setup.R")
+        stdin, stdout, stderr = self.ssh.exec_command("Rscript setup.R")
+
 
 
 
