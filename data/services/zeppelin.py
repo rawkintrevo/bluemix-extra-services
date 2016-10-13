@@ -30,8 +30,7 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
         "interpreter.json"  : "conf/interpreter.json",
         "zeppelin-site.xml" : "conf/zeppelin-site.xml",
         "zeppelin-env.sh"    : "conf/zeppelin-env.sh",
-        "setup.R"           : "../setup.R",
-        "Rprofile_template" : "../.Rprofile"
+
     }
 
     def start(self):
@@ -223,9 +222,11 @@ export AWS_SECRET_ACCESS_KEY=%s
         print "created new terp '%s' from terp '%s" % (new_terp_name, original_terp_name)
 
     def setupR(self):
+        self.uploadConfig({  "setup.R"           : "../setup.R",
+                             "Rprofile_template" : "../.Rprofile"})
         stdin, stdout, stderr = self.ssh.exec_command("mkdir -p ~/R/packages/")
-        stdin, stdout, stderr = self.ssh.exec_command("/usr/iop/current/spark-client/bin/sparkR setup.R")
-        stdin, stdout, stderr = self.ssh.exec_command("Rscript setup.R")
+        stdin, stdout, stderr = self.ssh.exec_command("/usr/iop/current/spark-client/bin/sparkR ../setup.R")
+        stdin, stdout, stderr = self.ssh.exec_command("Rscript ../setup.R")
 
 
 

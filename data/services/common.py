@@ -123,8 +123,12 @@ class AbstractServiceOnBI:
         if config_files == None:
             config_files = self.config_files
         for k, v in config_files.iteritems():
-            self.scp.get('./%s/%s' % (self.dirName, v),
-                         "./data/resources/%s/%s" % (self.service_name, k))
+            try:
+                self.scp.get('./%s/%s' % (self.dirName, v),
+                             "./data/resources/%s/%s" % (self.service_name, k))
+            except:
+                print "unable do download ./%s/%s" % (self.dirName, v)
+
 
     def uploadConfig(self, config_files=None):
         """
