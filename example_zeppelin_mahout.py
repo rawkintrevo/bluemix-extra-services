@@ -48,3 +48,4 @@ z.setupR()
 z.start()
 z.setupR()
 
+z.deployApp(APP_PREFIX)
