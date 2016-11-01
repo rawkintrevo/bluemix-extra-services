@@ -16,11 +16,12 @@
 #  * limitations under the License.
 #  */
 
+from os.path import isdir
 from subprocess import call
 
 import json
 
-def deploy_app(port, new_app_name, server, username, password, remoteBindAddr="127.0.0.1" ):
+def deploy_app(port, new_app_name, server, username, password, remoteBindAddr="127.0.0.1", delete_if_exists=False ):
     app_config = {
         "server": server,
         "username": username,
@@ -29,6 +30,9 @@ def deploy_app(port, new_app_name, server, username, password, remoteBindAddr="1
         "remoteBindAddr" : remoteBindAddr
 
     }
+
+    if not isdir("webapp"):
+        clone_rawkintrevos_webapp_template()
 
     with open('webapp/config.json', 'w') as f:
         json.dump(app_config, f)
@@ -39,7 +43,10 @@ def deploy_app(port, new_app_name, server, username, password, remoteBindAddr="1
     fout.write(manifest)
     fin.close()
     fout.close()
-    call(["cf", "push", new_app_name], cwd="webapp")
+    if delete_if_exists:
+        print "Attempting to delete %s" % new_app_name
+        call(["cf", "delete", new_app_name, "-f"])
+    call(["cf", "push", new_app_name], cwd="./webapp")
     print "webapp will be available soon at http://%s.mybluemix.net" % new_app_name
 
 def clone_rawkintrevos_webapp_template():
