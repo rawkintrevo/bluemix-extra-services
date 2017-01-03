@@ -23,7 +23,7 @@ from data.services.common import AbstractServiceOnBI
 class ZeppelinServiceOnBI(AbstractServiceOnBI):
     service_name = 'zeppelin'
     service_port = 8081
-    binaryLocation = "https://github.com/rawkintrevo/incubator-zeppelin/releases/download/v0.7.0-NIGHTLY-2016.09.29/zeppelin-0.7.0-SNAPSHOT.tar.gz"
+    binaryLocation = "https://github.com/rawkintrevo/incubator-zeppelin/releases/download/v0.7.0-NIGHTLY-2016.11.09/zeppelin-0.7.0-SNAPSHOT.tar.gz"
     interpreter_json = {}
 
     config_files = {
@@ -160,6 +160,13 @@ export AWS_ACCESS_KEY_ID=%s
 export AWS_SECRET_ACCESS_KEY=%s
 
 """ % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
+
+    def setZeppelinHub(self):
+        # Get ZeppelinHub Jar #
+        stdin, stdout, stderr = self.ssh.exec_command("mkdir " + self.dirName + "/lib")
+        stdin, stdout, stderr = self.ssh.exec_command("wget https://s3-ap-northeast-1.amazonaws.com/zeppel.in/zeppelinhub-integration-v0.4.0-all.jar")
+        stdin, stdout, stderr = self.ssh.exec_command("mv zeppelinhub-integration-v0.4.0-all.jar " + self.dirName + "/lib")
+
 
     def _readTerpJson(self):
         with open("./data/resources/zeppelin/interpreter.json") as f:

@@ -48,5 +48,13 @@ z.setupR()
 z.start()
 z.setupR()
 
+<<<<<<< HEAD
 
 z.deployApp(APP_PREFIX)
+=======
+### Only need to uncomment/run this once ever. 
+# from data.webapp import clone_rawkintrevos_webapp_template
+# clone_rawkintrevos_webapp_template()
+
+z.deployApp(APP_PREFIX)
+>>>>>>> 2dc28769182d84437dd9582e5db6e798e48061cd
