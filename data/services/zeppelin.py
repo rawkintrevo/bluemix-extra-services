@@ -148,33 +148,33 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
 
     def setS3auth(self, s3user, s3bucket, root_key_path = "data/resources/aws/rootkey.csv"):
 
-        if(os.path.isfile(root_key_path)) :
-            print "HERE : "
-
+        try :
             aws_keys = open(root_key_path).readlines()
-            aws_access_key_id = aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
-            aws_secret_access_key = aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")
-            import xml.etree.ElementTree as ET
-            tree = ET.parse('./data/resources/zeppelin/zeppelin-site.xml')
-            root = tree.getroot()
-            root.findall("./property/[name='zeppelin.notebook.s3.user']//value")[0].text = s3user
-            root.findall("./property/[name='zeppelin.notebook.s3.bucket']//value")[0].text = s3bucket
-            tree.write('./data/resources/zeppelin/zeppelin-site.xml')
-    
-            with open('./data/resources/zeppelin/zeppelin-env.sh', 'w') as out, \
-                    open('./data/resources/zeppelin/zeppelin-env.sh.template', 'r') as input:
-    
-                out.write(input.read() +  """
-    export ZEPPELIN_NOTEBOOK_S3_BUCKET=%s
-    export ZEPPELIN_NOTEBOOK_S3_USER=%s
-    export AWS_ACCESS_KEY_ID=%s
-    export AWS_SECRET_ACCESS_KEY=%s
-    
-    """ % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
-    
-            self.s3authSet = True
-        else : 
+        except (IOError):
             print "ERROR : rootkey.csv file not detected.  Go to AWS security center and generate access key.  Save in data/resources/aws/rootkey.csv"
+            exit()
+       
+        aws_access_key_id = aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
+        aws_secret_access_key = aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('./data/resources/zeppelin/zeppelin-site.xml')
+        root = tree.getroot()
+        root.findall("./property/[name='zeppelin.notebook.s3.user']//value")[0].text = s3user
+        root.findall("./property/[name='zeppelin.notebook.s3.bucket']//value")[0].text = s3bucket
+        tree.write('./data/resources/zeppelin/zeppelin-site.xml')
+
+        with open('./data/resources/zeppelin/zeppelin-env.sh', 'w') as out, \
+                open('./data/resources/zeppelin/zeppelin-env.sh.template', 'r') as input:
+
+            out.write(input.read() +  """
+export ZEPPELIN_NOTEBOOK_S3_BUCKET=%s
+export ZEPPELIN_NOTEBOOK_S3_USER=%s
+export AWS_ACCESS_KEY_ID=%s
+export AWS_SECRET_ACCESS_KEY=%s
+
+""" % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
+
+        self.s3authSet = True
 
 
     def setZeppelinHub(self):
