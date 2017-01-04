@@ -16,7 +16,7 @@
 #  * limitations under the License.
 #  */
 import json
-
+import os.path
 from data.services.common import AbstractServiceOnBI
 
 
@@ -25,6 +25,7 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
     service_port = 8081
     binaryLocation = "https://github.com/rawkintrevo/incubator-zeppelin/releases/download/v0.7.0-NIGHTLY-2016.11.09/zeppelin-0.7.0-SNAPSHOT.tar.gz"
     interpreter_json = {}
+    s3authSet = False
 
     config_files = {
         "interpreter.json"  : "conf/interpreter.json",
@@ -34,19 +35,25 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
     }
 
     def start(self):
-        print "starting zeppelin"
-        stdin, stdout, stderr = self.ssh.exec_command(self.dirName + "/bin/zeppelin-daemon.sh status")
-        zeppelin_status = stdout.read()
-        if "OK" in zeppelin_status:
-            print "Zeppelin already running. Restarting instead"
-            stdin, stdout, stderr = self.ssh.exec_command("zeppelin-0.7.0-SNAPSHOT/bin/zeppelin-daemon.sh restart")
-            print stdout.read()
-        if "FAILED" in zeppelin_status:
-            stdin, stdout, stderr = self.ssh.exec_command(self.dirName + "/bin/zeppelin-daemon.sh start")
+        # Add quick check here to see if s3AuthSet was run
+        if(self.s3authSet) : 
+
+            print "starting zeppelin"
+            stdin, stdout, stderr = self.ssh.exec_command(self.dirName + "/bin/zeppelin-daemon.sh status")
             zeppelin_status = stdout.read()
-            print "Status:  ", zeppelin_status
-            if not "OK" in zeppelin_status:
-                print stderr.read()
+            if "OK" in zeppelin_status:
+                print "Zeppelin already running. Restarting instead"
+                stdin, stdout, stderr = self.ssh.exec_command("zeppelin-0.7.0-SNAPSHOT/bin/zeppelin-daemon.sh restart")
+                print stdout.read()
+            if "FAILED" in zeppelin_status:
+                stdin, stdout, stderr = self.ssh.exec_command(self.dirName + "/bin/zeppelin-daemon.sh start")
+                zeppelin_status = stdout.read()
+                print "Status:  ", zeppelin_status
+                if not "OK" in zeppelin_status:
+                    print stderr.read()
+        else :
+            print " ERROR : need to run setS3auth method prior to running start method"
+            exit()
 
     def _updateMulitpleProps(self, propsList):
         for u in propsList:
@@ -140,26 +147,35 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
             f.write(mahout_home_str)
 
     def setS3auth(self, s3user, s3bucket, root_key_path = "data/resources/aws/rootkey.csv"):
-        aws_keys = open(root_key_path).readlines()
-        aws_access_key_id = aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
-        aws_secret_access_key = aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")
-        import xml.etree.ElementTree as ET
-        tree = ET.parse('./data/resources/zeppelin/zeppelin-site.xml')
-        root = tree.getroot()
-        root.findall("./property/[name='zeppelin.notebook.s3.user']//value")[0].text = s3user
-        root.findall("./property/[name='zeppelin.notebook.s3.bucket']//value")[0].text = s3bucket
-        tree.write('./data/resources/zeppelin/zeppelin-site.xml')
 
-        with open('./data/resources/zeppelin/zeppelin-env.sh', 'w') as out, \
-                open('./data/resources/zeppelin/zeppelin-env.sh.template', 'r') as input:
+        if(os.path.isfile(root_key_path)) :
+            print "HERE : "
 
-            out.write(input.read() +  """
-export ZEPPELIN_NOTEBOOK_S3_BUCKET=%s
-export ZEPPELIN_NOTEBOOK_S3_USER=%s
-export AWS_ACCESS_KEY_ID=%s
-export AWS_SECRET_ACCESS_KEY=%s
+            aws_keys = open(root_key_path).readlines()
+            aws_access_key_id = aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
+            aws_secret_access_key = aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")
+            import xml.etree.ElementTree as ET
+            tree = ET.parse('./data/resources/zeppelin/zeppelin-site.xml')
+            root = tree.getroot()
+            root.findall("./property/[name='zeppelin.notebook.s3.user']//value")[0].text = s3user
+            root.findall("./property/[name='zeppelin.notebook.s3.bucket']//value")[0].text = s3bucket
+            tree.write('./data/resources/zeppelin/zeppelin-site.xml')
+    
+            with open('./data/resources/zeppelin/zeppelin-env.sh', 'w') as out, \
+                    open('./data/resources/zeppelin/zeppelin-env.sh.template', 'r') as input:
+    
+                out.write(input.read() +  """
+    export ZEPPELIN_NOTEBOOK_S3_BUCKET=%s
+    export ZEPPELIN_NOTEBOOK_S3_USER=%s
+    export AWS_ACCESS_KEY_ID=%s
+    export AWS_SECRET_ACCESS_KEY=%s
+    
+    """ % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
+    
+            self.s3authSet = True
+        else : 
+            print "ERROR : rootkey.csv file not detected.  Go to AWS security center and generate access key.  Save in data/resources/aws/rootkey.csv"
 
-""" % (s3bucket, s3user, aws_access_key_id, aws_secret_access_key))
 
     def setZeppelinHub(self):
         # Get ZeppelinHub Jar #
