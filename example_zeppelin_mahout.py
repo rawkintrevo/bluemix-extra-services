@@ -24,11 +24,12 @@ m.uploadConfig()
 
 z = ZeppelinServiceOnBI(SERVER, USERNAME, PASSWORD)
 z.install()
+z.setS3auth(S3_USERNAME, S3_BUCKET) ## Must do this prior to z.start
+
 z.start()
 sleep(5)
 z.downloadConfig({"interpreter.json"  : "conf/interpreter.json"})
 z.updateConfig()
-#z.setS3auth(S3_USERNAME, S3_BUCKET) ## Must do this first!
 
 ## Add your own dependencies if you want them always there...
 #z._addTerpDep("spark", "com.databricks:spark-csv_2.10:1.4.0")
@@ -48,13 +49,8 @@ z.setupR()
 z.start()
 z.setupR()
 
-<<<<<<< HEAD
-
-z.deployApp(APP_PREFIX)
-=======
 ### Only need to uncomment/run this once ever. 
 # from data.webapp import clone_rawkintrevos_webapp_template
 # clone_rawkintrevos_webapp_template()
 
 z.deployApp(APP_PREFIX)
->>>>>>> 2dc28769182d84437dd9582e5db6e798e48061cd

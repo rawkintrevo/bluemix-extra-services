@@ -151,8 +151,10 @@ class ZeppelinServiceOnBI(AbstractServiceOnBI):
         try :
             aws_keys = open(root_key_path).readlines()
         except (IOError):
-            print "ERROR : rootkey.csv file not detected.  Go to AWS security center and generate access key.  Save in data/resources/aws/rootkey.csv"
-            exit()
+            print "ERROR : rootkey.csv file not detected.  Go to AWS security center and generate access key."
+            print "\tSave in data/resources/aws/rootkey.csv or specify an alternate path to rootkey.csv in setS3auth"
+            print "\texample : z.setS3auth(S3_USERNAME, S3_BUCKET, ROOTKEY_PATH) "
+            exit(1)
        
         aws_access_key_id = aws_keys[0].split("=")[1].replace("\n", "").replace("\r", "")
         aws_secret_access_key = aws_keys[1].split("=")[1].replace("\n", "").replace("\r", "")

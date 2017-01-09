@@ -38,11 +38,11 @@ flink.deployApp(APP_PREFIX)
 
 z = ZeppelinServiceOnBI(SERVER, USERNAME, PASSWORD)
 z.install()
+z.setS3auth(S3_USERNAME, S3_BUCKET) ## Must do this first!
 z.start()
 sleep(5)
 z.downloadConfig({"interpreter.json"  : "conf/interpreter.json"})
 z.updateConfig()
-z.setS3auth(S3_USERNAME, S3_BUCKET) ## Must do this first!
 ## Add your own dependencies if you want them always there...
 #z._addTerpDep("spark", "com.databricks:spark-csv_2.10:1.4.0")
 
